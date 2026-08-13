@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --color-aura-bg: #090a0c;
+  --color-aura-card: #14161c;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #090a0c;
+  color: #e2e8f0;
+}
+

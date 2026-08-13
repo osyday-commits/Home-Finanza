@@ -1,0 +1,183 @@
+import React from 'react';
+import { 
+  LayoutDashboard, 
+  Receipt, 
+  Package,
+  ScanLine, 
+  RefreshCw, 
+  Landmark, 
+  Target, 
+  ShieldCheck, 
+  Lock, 
+  Plus, 
+  Cloud, 
+  Sparkles,
+  Zap,
+  Edit2,
+  Settings as SettingsIcon
+} from 'lucide-react';
+import { DriveSyncState } from '../types';
+import { BrandLogo } from './BrandLogo';
+
+export type ActiveTab = 'dashboard' | 'transactions' | 'inventory' | 'scanner' | 'subscriptions' | 'accounts' | 'budgets' | 'security' | 'settings';
+
+interface NavbarProps {
+  activeTab: ActiveTab;
+  setActiveTab: (tab: ActiveTab) => void;
+  onOpenAddModal: () => void;
+  onLockApp: () => void;
+  driveState: DriveSyncState;
+  onBankSync: () => void;
+  isSyncingBank: boolean;
+  appName?: string;
+  appLogo?: string;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  setActiveTab,
+  onOpenAddModal,
+  onLockApp,
+  driveState,
+  onBankSync,
+  isSyncingBank,
+  appName = 'Aura Finance',
+  appLogo = 'Sparkles'
+}) => {
+  const navItems: { id: ActiveTab; label: string; icon: React.FC<{ className?: string }> }[] = [
+    { id: 'dashboard', label: 'Dashboard & Intelligence', icon: LayoutDashboard },
+    { id: 'transactions', label: 'Transactions & Statements', icon: Receipt },
+    { id: 'inventory', label: 'Inventory', icon: Package },
+    { id: 'scanner', label: 'AI Receipt Scanner', icon: ScanLine },
+    { id: 'subscriptions', label: 'Subscriptions', icon: RefreshCw },
+    { id: 'accounts', label: 'Linked Accounts', icon: Landmark },
+    { id: 'budgets', label: 'Budgets & Goals', icon: Target },
+    { id: 'security', label: 'Security & Backup', icon: ShieldCheck },
+    { id: 'settings', label: 'Control & Settings', icon: SettingsIcon }
+  ];
+
+  return (
+    <header className="sticky top-0 z-40 bg-[#090a0c]/90 backdrop-blur-xl border-b border-white/5">
+      {/* Top Banner Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Logo & Identity */}
+          <div
+            className="group flex items-center gap-3 cursor-pointer select-none p-1.5 -ml-1.5 rounded-2xl hover:bg-white/5 transition-all"
+            onClick={() => setActiveTab('dashboard')}
+            title="Click to view Dashboard or edit App Name & Logo in Settings"
+          >
+            <div className="relative">
+              <BrandLogo logo={appLogo} size="md" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab('settings');
+                }}
+                className="absolute -top-1 -right-1 p-1 bg-indigo-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-indigo-500"
+                title="Change Logo & App Name"
+              >
+                <Edit2 className="w-2.5 h-2.5" />
+              </button>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-serif italic text-2xl text-indigo-400 tracking-tight font-medium group-hover:text-indigo-300 transition-colors">
+                  {appName}
+                </h1>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTab('settings');
+                  }}
+                  className="p-1 text-slate-500 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-white/5"
+                  title="Modify App Name & Logo"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                  Bank-Grade
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 hidden sm:block">
+                AI Wealth Intelligence & Drive Cloud Sync
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Action Badges & Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            
+            {/* Live Bank Sync Trigger */}
+            <button
+              onClick={onBankSync}
+              disabled={isSyncingBank}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14161c] hover:bg-slate-800 text-xs text-slate-300 transition-colors border border-white/5"
+              title="Sync Live Bank Feed"
+            >
+              <Zap className={`w-3.5 h-3.5 text-amber-400 ${isSyncingBank ? 'animate-spin' : ''}`} />
+              <span>{isSyncingBank ? 'Syncing...' : 'Live Bank Sync'}</span>
+            </button>
+
+            {/* Google Drive Status Badge */}
+            <button
+              onClick={() => setActiveTab('security')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs hover:bg-emerald-500/20 transition-colors"
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span className="hidden md:inline font-medium text-[11px] uppercase tracking-wider">Synced to Cloud</span>
+            </button>
+
+            {/* Lock App Trigger */}
+            <button
+              onClick={onLockApp}
+              className="p-2 rounded-xl bg-[#14161c] hover:bg-slate-800 text-slate-300 transition-colors border border-white/5"
+              title="Lock with Biometric PIN"
+            >
+              <Lock className="w-4 h-4 text-indigo-400" />
+            </button>
+
+            {/* + Add Record Button */}
+            <button
+              onClick={onOpenAddModal}
+              className="px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs sm:text-sm shadow-md shadow-indigo-950/50 flex items-center gap-1.5 border border-indigo-400/30 transition-all active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Record Transaction</span>
+              <span className="sm:hidden">Add</span>
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* Navigation Tabs Scroll Bar */}
+      <div className="bg-[#090a0c]/80 border-t border-white/5 overflow-x-auto scrollbar-none">
+        <div className="max-w-7xl mx-auto px-4 flex space-x-1 sm:space-x-2 py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  isActive
+                    ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#14161c]'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </header>
+  );
+};

@@ -1,0 +1,8 @@
+{
+  "name": "Home Finance AI Tracker",
+  "description": "AI-powered expense categorization, receipt OCR parsing, multi-account tracking, budget analytics, subscription management, and Google Drive backup.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
