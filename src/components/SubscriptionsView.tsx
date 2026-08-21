@@ -10,13 +10,18 @@ import {
   Trash2, 
   Edit3,
   DollarSign,
-  CreditCard
+  CreditCard,
+  Sparkles,
+  CalendarCheck
 } from 'lucide-react';
-import { Subscription, Account } from '../types';
+import { Subscription, Account, Transaction, GoogleWorkspaceState } from '../types';
+import { SmartRemindersView } from './SmartRemindersView';
 
 interface SubscriptionsViewProps {
   subscriptions: Subscription[];
   accounts: Account[];
+  transactions?: Transaction[];
+  workspaceState?: GoogleWorkspaceState;
   onAddSubscription: (sub: Partial<Subscription>) => void;
   onUpdateSubscription?: (sub: Subscription) => void;
   onDeleteSubscription: (id: string) => void;
@@ -25,10 +30,13 @@ interface SubscriptionsViewProps {
 export const SubscriptionsView: React.FC<SubscriptionsViewProps> = ({
   subscriptions,
   accounts,
+  transactions = [],
+  workspaceState,
   onAddSubscription,
   onUpdateSubscription,
   onDeleteSubscription
 }) => {
+  const [activeTab, setActiveTab] = useState<'all' | 'smart-reminders'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
 
@@ -130,52 +138,110 @@ export const SubscriptionsView: React.FC<SubscriptionsViewProps> = ({
           </p>
         </div>
 
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setActiveTab(activeTab === 'all' ? 'smart-reminders' : 'all')}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all border ${
+              activeTab === 'smart-reminders'
+                ? 'bg-indigo-600 text-white border-indigo-400/40 shadow-lg shadow-indigo-950/60'
+                : 'bg-[#1e2230] text-indigo-300 border-indigo-500/30 hover:bg-[#282d40]'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <span>{activeTab === 'smart-reminders' ? 'View Subscriptions List' : 'Gemini Smart Reminders'}</span>
+          </button>
+
+          {activeTab === 'all' && (
+            <button
+              onClick={handleOpenAdd}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-md shadow-indigo-950/50 border border-indigo-400/30 active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Subscription</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mode Subtabs */}
+      <div className="flex items-center gap-2 border-b border-white/5 pb-2">
         <button
-          onClick={handleOpenAdd}
-          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-md shadow-indigo-950/50 border border-indigo-400/30 active:scale-95"
+          onClick={() => setActiveTab('all')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'all'
+              ? 'bg-white/10 text-white border border-white/10'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
         >
-          <Plus className="w-4 h-4" />
-          <span>Add Subscription</span>
+          <CreditCard className="w-4 h-4 text-indigo-400" />
+          <span>Active Subscriptions ({subscriptions.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('smart-reminders')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'smart-reminders'
+              ? 'bg-indigo-600 text-white shadow-md border border-indigo-400/30'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-indigo-300" />
+          <span>Gemini Smart Calendar Reminders</span>
         </button>
       </div>
 
-      {/* Subscription Alerts Banner */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <Bell className="w-5 h-5 text-amber-400 animate-bounce" />
-          <div>
-            <strong className="text-white font-semibold">Upcoming Renewal Alerts:</strong>
-            <span className="ml-1 text-slate-300">iCloud+ 2TB ($9.99) renews in 6 days • Equinox Gym ($180.00) renews in 9 days.</span>
+      {/* Render Smart Reminders View if active */}
+      {activeTab === 'smart-reminders' ? (
+        <SmartRemindersView
+          subscriptions={subscriptions}
+          transactions={transactions}
+          workspaceState={workspaceState}
+        />
+      ) : (
+        <>
+          {/* Subscription Alerts Banner */}
+          <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse shrink-0" />
+              <div>
+                <strong className="text-white font-semibold">Gemini AI Cadence Analysis Available:</strong>
+                <span className="ml-1 text-slate-300">
+                  Analyze subscription frequencies and schedule automated Google Calendar notifications.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('smart-reminders')}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shrink-0"
+            >
+              <CalendarCheck className="w-3.5 h-3.5" />
+              <span>Launch Smart Reminders</span>
+            </button>
           </div>
-        </div>
-        <span className="px-2 py-1 rounded bg-amber-500/20 text-amber-300 font-serif text-[10px]">
-          {subscriptions.filter((s) => s.status === 'Active').length} Active Subs
-        </span>
-      </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
-          <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Monthly Recurring Total</span>
-          <div className="text-3xl font-serif text-indigo-400 tracking-tight">
-            ${totalMonthlyCost.toFixed(2)}<span className="text-xs font-sans text-slate-400">/mo</span>
-          </div>
-        </div>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
+              <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Monthly Recurring Total</span>
+              <div className="text-3xl font-serif text-indigo-400 tracking-tight">
+                ${totalMonthlyCost.toFixed(2)}<span className="text-xs font-sans text-slate-400">/mo</span>
+              </div>
+            </div>
 
-        <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
-          <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Annual Subscription Total</span>
-          <div className="text-3xl font-serif text-white tracking-tight">
-            ${totalYearlyCost.toFixed(2)}<span className="text-xs font-sans text-slate-400">/yr</span>
-          </div>
-        </div>
+            <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
+              <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Annual Subscription Total</span>
+              <div className="text-3xl font-serif text-white tracking-tight">
+                ${totalYearlyCost.toFixed(2)}<span className="text-xs font-sans text-slate-400">/yr</span>
+              </div>
+            </div>
 
-        <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
-          <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Active Subscriptions</span>
-          <div className="text-3xl font-serif text-emerald-400 tracking-tight">
-            {subscriptions.filter((s) => s.status === 'Active').length} Active
+            <div className="bg-[#14161c] p-5 rounded-2xl border border-white/5 space-y-1 shadow-lg">
+              <span className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-medium">Active Subscriptions</span>
+              <div className="text-3xl font-serif text-emerald-400 tracking-tight">
+                {subscriptions.filter((s) => s.status === 'Active').length} Active
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
       {/* Subscription Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -246,6 +312,8 @@ export const SubscriptionsView: React.FC<SubscriptionsViewProps> = ({
           );
         })}
       </div>
+      </>
+      )}
 
       {/* Modal Add / Edit Subscription */}
       {isModalOpen && (

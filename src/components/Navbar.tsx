@@ -19,7 +19,7 @@ import {
 import { DriveSyncState } from '../types';
 import { BrandLogo } from './BrandLogo';
 
-export type ActiveTab = 'dashboard' | 'transactions' | 'inventory' | 'scanner' | 'subscriptions' | 'accounts' | 'budgets' | 'security' | 'settings';
+export type ActiveTab = 'dashboard' | 'transactions' | 'inventory' | 'scanner' | 'subscriptions' | 'accounts' | 'budgets' | 'workspace' | 'security' | 'settings';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -52,6 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'subscriptions', label: 'Subscriptions', icon: RefreshCw },
     { id: 'accounts', label: 'Linked Accounts', icon: Landmark },
     { id: 'budgets', label: 'Budgets & Goals', icon: Target },
+    { id: 'workspace', label: 'Google Workspace', icon: Sparkles },
     { id: 'security', label: 'Security & Backup', icon: ShieldCheck },
     { id: 'settings', label: 'Control & Settings', icon: SettingsIcon }
   ];
@@ -125,10 +126,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Google Drive Status Badge */}
             <button
               onClick={() => setActiveTab('security')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs hover:bg-emerald-500/20 transition-colors"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-colors ${
+                driveState.isConnected
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                  : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20'
+              }`}
+              title={driveState.isConnected ? `Synced with Google Drive folder: ${driveState.folderName || 'Home Finance Data'}` : 'Connect to Google Drive'}
             >
-              <Cloud className="w-3.5 h-3.5" />
-              <span className="hidden md:inline font-medium text-[11px] uppercase tracking-wider">Synced to Cloud</span>
+              <Cloud className={`w-3.5 h-3.5 ${driveState.isSyncing ? 'animate-pulse' : ''}`} />
+              <span className="hidden md:inline font-semibold text-[11px] uppercase tracking-wider">
+                {driveState.isConnected ? 'Drive Synced' : 'Connect Drive'}
+              </span>
             </button>
 
             {/* Lock App Trigger */}

@@ -109,8 +109,15 @@ export interface DriveSyncState {
   lastSyncedAt: string | null;
   fileName: string;
   fileId: string | null;
+  folderName?: string;
+  folderId?: string | null;
   isSyncing: boolean;
   userEmail?: string;
+  userName?: string;
+  userPhoto?: string;
+  autoSyncOnOpen?: boolean;
+  driveWebLink?: string;
+  error?: string | null;
 }
 
 export interface BiometricSettings {
@@ -152,6 +159,82 @@ export interface InventoryItem {
   createdAt: string;
 }
 
+export interface GmailMessageItem {
+  id: string;
+  threadId: string;
+  subject: string;
+  from: string;
+  date: string;
+  snippet: string;
+  extractedAmount?: number;
+  extractedMerchant?: string;
+  extractedCategory?: string;
+  isFinancial: boolean;
+}
+
+export interface GoogleSheetMeta {
+  spreadsheetId: string;
+  spreadsheetUrl: string;
+  title: string;
+  sheets: string[];
+  lastExportedAt?: string;
+}
+
+export interface GoogleCalendarEvent {
+  id: string;
+  summary: string;
+  description?: string;
+  start: { date?: string; dateTime?: string };
+  end: { date?: string; dateTime?: string };
+  htmlLink?: string;
+  isFinancialReminder?: boolean;
+}
+
+export interface SmartReminderRecommendation {
+  subscriptionId?: string;
+  provider: string;
+  name: string;
+  amount: number;
+  billingCycle: 'Monthly' | 'Yearly' | 'Weekly' | 'Quarterly' | 'Bi-Weekly' | 'Custom';
+  predictedDueDate: string; // YYYY-MM-DD
+  confidence: number;
+  optimalReminderLeadDays: number; // e.g. 1, 3, 7
+  notificationLeadMinutes: number[]; // e.g. [4320, 1440, 120]
+  calendarEventTitle: string;
+  calendarEventDescription: string;
+  urgencyLevel: 'High' | 'Medium' | 'Low';
+  aiInsight: string;
+  isFlaggedForReview: boolean;
+  cancellationWindowNotes?: string;
+  potentialAnnualSavings?: number;
+  category?: string;
+  calendarEventId?: string;
+  isSyncedToCalendar?: boolean;
+}
+
+export interface SmartReminderAnalysisResult {
+  analysisSummary: string;
+  totalMonthlyObligations: number;
+  totalAnnualObligations: number;
+  activeSubscriptionsCount: number;
+  highRiskAlerts: string[];
+  recommendations: SmartReminderRecommendation[];
+  analyzedAt: string;
+}
+
+export interface GoogleWorkspaceState {
+  isConnected: boolean;
+  userEmail?: string;
+  userName?: string;
+  userPhoto?: string;
+  sheetsMeta?: GoogleSheetMeta | null;
+  lastSheetsSync?: string | null;
+  lastGmailSync?: string | null;
+  lastCalendarSync?: string | null;
+  syncedCalendarEventsCount?: number;
+  smartRemindersCount?: number;
+}
+
 export interface FinancialDataStore {
   transactions: Transaction[];
   accounts: Account[];
@@ -162,3 +245,4 @@ export interface FinancialDataStore {
   settings?: AppSettings;
   lastUpdated: string;
 }
+

@@ -10,6 +10,7 @@ import { BudgetsGoalsView } from './components/BudgetsGoalsView';
 import { SecurityDriveView } from './components/SecurityDriveView';
 import { SettingsView } from './components/SettingsView';
 import { InventoryView } from './components/InventoryView';
+import { GoogleWorkspaceView } from './components/GoogleWorkspaceView';
 import { TransactionModal } from './components/TransactionModal';
 
 import { 
@@ -36,8 +37,10 @@ import {
 
 import { 
   getDriveSyncState, 
+  saveDriveSyncState,
   syncToGoogleDrive, 
-  restoreFromGoogleDrive 
+  restoreFromGoogleDrive,
+  initDriveAuth 
 } from './services/driveService';
 
 export default function App() {
@@ -55,6 +58,44 @@ export default function App() {
   useEffect(() => {
     saveFinancialStore(store);
   }, [store]);
+
+  // Google Drive Auth Initialization & Auto-sync on startup
+  useEffect(() => {
+    const unsubscribe = initDriveAuth(
+      async (_user, token) => {
+        setDriveState(getDriveSyncState());
+        // Auto-sync on app open if enabled
+        const currentState = getDriveSyncState();
+        if (currentState.autoSyncOnOpen !== false) {
+          try {
+            await syncToGoogleDrive(store, token);
+            setDriveState(getDriveSyncState());
+          } catch (err) {
+            console.error('Auto sync on open failed:', err);
+          }
+        }
+      },
+      () => {
+        setDriveState(getDriveSyncState());
+      }
+    );
+
+    // Initial startup sync if already state is ready
+    const initialCheck = async () => {
+      const currentState = getDriveSyncState();
+      if (currentState.autoSyncOnOpen !== false) {
+        try {
+          await syncToGoogleDrive(store);
+          setDriveState(getDriveSyncState());
+        } catch (e) {
+          console.log('Startup sync check:', e);
+        }
+      }
+    };
+    initialCheck();
+
+    return () => unsubscribe();
+  }, []);
 
   // Lock / Unlock handlers
   const handleUnlock = () => {
@@ -263,7 +304,7 @@ export default function App() {
 
   // Drive Backup & Restore Actions
   const handleSyncDriveNow = async () => {
-    const res = await syncToGoogleDrive(store);
+    await syncToGoogleDrive(store);
     setDriveState(getDriveSyncState());
   };
 
@@ -273,6 +314,15 @@ export default function App() {
       setStore(restored);
       setDriveState(getDriveSyncState());
     }
+  };
+
+  const handleToggleAutoSync = (enabled: boolean) => {
+    const updated = {
+      ...driveState,
+      autoSyncOnOpen: enabled
+    };
+    setDriveState(updated);
+    saveDriveSyncState(updated);
   };
 
   const handleImportStore = (jsonStr: string) => {
@@ -365,6 +415,7 @@ export default function App() {
               setActiveTab('transactions');
             }}
             accounts={store.accounts}
+            transactions={store.transactions}
           />
         )}
 
@@ -372,6 +423,13 @@ export default function App() {
           <SubscriptionsView
             subscriptions={store.subscriptions}
             accounts={store.accounts}
+            transactions={store.transactions}
+            workspaceState={{
+              isConnected: driveState.isConnected,
+              userEmail: driveState.userEmail,
+              userName: driveState.userName,
+              userPhoto: driveState.userPhoto
+            }}
             onAddSubscription={handleAddSubscription}
             onUpdateSubscription={handleUpdateSubscription}
             onDeleteSubscription={handleDeleteSubscription}
@@ -400,6 +458,15 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'workspace' && (
+          <GoogleWorkspaceView
+            store={store}
+            driveState={driveState}
+            onAddTransaction={handleSaveTransaction}
+            onRefreshDrive={handleSyncDriveNow}
+          />
+        )}
+
         {activeTab === 'security' && (
           <SecurityDriveView
             biometricSettings={biometricSettings}
@@ -407,6 +474,7 @@ export default function App() {
             driveState={driveState}
             onSyncDriveNow={handleSyncDriveNow}
             onRestoreDriveNow={handleRestoreDriveNow}
+            onToggleAutoSync={handleToggleAutoSync}
             store={store}
             onImportStore={handleImportStore}
           />

@@ -1,6 +1,6 @@
 {
   "name": "Home Finance AI Tracker",
-  "description": "AI-powered expense categorization, receipt OCR parsing, multi-account tracking, budget analytics, subscription management, and Google Drive backup.",
+  "description": "AI-powered expense categorization, receipt OCR parsing, multi-account tracking, budget analytics, subscription management, Google Drive sync, Google Sheets export, Gmail receipt scanning, and Google Calendar bill reminders.",
   "requestFramePermissions": [
     "camera"
   ],
