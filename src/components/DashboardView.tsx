@@ -29,18 +29,22 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { Transaction, Account, BudgetCategory, SavingsGoal, Subscription, AISpendingInsight, AppSettings } from '../types';
+import { Transaction, Account, BudgetCategory, SavingsGoal, Subscription, AISpendingInsight, AppSettings, BankStatement } from '../types';
 import { DEFAULT_SETTINGS } from '../data/initialData';
 import { SubcategoryPieChart } from './SubcategoryPieChart';
+import { MonthlySpendingD3Summary } from './MonthlySpendingD3Summary';
+import { DashboardStatementsAnalysis } from './DashboardStatementsAnalysis';
 
 interface DashboardViewProps {
   transactions: Transaction[];
   accounts: Account[];
+  statements?: BankStatement[];
   budgets: BudgetCategory[];
   subscriptions: Subscription[];
   savingsGoals: SavingsGoal[];
   onOpenAddModal: () => void;
   onNavigateToScanner: () => void;
+  onNavigateToStatements?: () => void;
   settings?: AppSettings;
 }
 
@@ -58,11 +62,13 @@ const CATEGORY_COLORS: Record<string, string> = {
 export const DashboardView: React.FC<DashboardViewProps> = ({
   transactions,
   accounts,
+  statements = [],
   budgets,
   subscriptions,
   savingsGoals,
   onOpenAddModal,
   onNavigateToScanner,
+  onNavigateToStatements,
   settings
 }) => {
   const [selectedMonth, setSelectedMonth] = useState<string>('August');
@@ -524,8 +530,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       </div>
 
+      {/* D3 Monthly Spending Summary & Category Visualization Section */}
+      <MonthlySpendingD3Summary 
+        transactions={transactions} 
+        accounts={accounts}
+        budgets={budgets} 
+        settings={settings || DEFAULT_SETTINGS}
+        defaultMonth={selectedMonth}
+        defaultYear={selectedYear}
+      />
+
       {/* Subcategory Graphic Pie Chart Section */}
       <SubcategoryPieChart transactions={transactions} settings={settings || DEFAULT_SETTINGS} />
+
+      {/* Statements Intelligence Analysis: 3 Cards, Account Holder In vs Out Bar Chart, Interactive Pie with Drill-down */}
+      <DashboardStatementsAnalysis 
+        statements={statements} 
+        accounts={accounts} 
+        onNavigateToStatements={onNavigateToStatements} 
+      />
 
       {/* Recent Transactions Table */}
       <div className="bg-[#14161c] p-6 rounded-2xl border border-white/5 space-y-4 shadow-xl">

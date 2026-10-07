@@ -3,6 +3,7 @@ import { Navbar, ActiveTab } from './components/Navbar';
 import { BiometricLockModal } from './components/BiometricLockModal';
 import { DashboardView } from './components/DashboardView';
 import { TransactionsView } from './components/TransactionsView';
+import { StatementsView } from './components/StatementsView';
 import { AIScannerView } from './components/AIScannerView';
 import { SubscriptionsView } from './components/SubscriptionsView';
 import { AccountsView } from './components/AccountsView';
@@ -22,7 +23,8 @@ import {
   SavingsGoal, 
   BiometricSettings, 
   DriveSyncState,
-  AppSettings
+  AppSettings,
+  BankStatement
 } from './types';
 
 import { DEFAULT_SETTINGS } from './data/initialData';
@@ -233,6 +235,99 @@ export default function App() {
     }
   };
 
+  // Bank & Credit Card Statement Actions
+  const handleAddStatement = (newStmt: BankStatement) => {
+    setStore((prev) => ({
+      ...prev,
+      statements: [newStmt, ...(prev.statements || [])]
+    }));
+  };
+
+  const handleDeleteStatement = (id: string) => {
+    setStore((prev) => ({
+      ...prev,
+      statements: (prev.statements || []).filter((s) => s.id !== id)
+    }));
+  };
+
+  const handleUpdateStatement = (updatedStmt: BankStatement) => {
+    setStore((prev) => ({
+      ...prev,
+      statements: (prev.statements || []).map((s) => (s.id === updatedStmt.id ? updatedStmt : s))
+    }));
+  };
+
+  const handleAddTransactionFromStatement = (
+    txData: Partial<Transaction>,
+    statementId: string,
+    statementItemId: string
+  ) => {
+    const txId = `TRX-${Math.floor(100 + Math.random() * 900)}`;
+    const fullTx: Transaction = {
+      id: txId,
+      date: txData.date || new Date().toISOString().split('T')[0],
+      type: txData.type || 'Expense',
+      category: txData.category || 'Everyday',
+      subcategory: txData.subcategory || 'General',
+      description: txData.description || txData.provider || 'Statement Item',
+      amount: txData.amount || 0,
+      provider: txData.provider || 'Bank Merchant',
+      frequency: txData.frequency || 'One Time',
+      receiptUrl: txData.receiptUrl || '',
+      month: txData.date ? new Date(txData.date).toLocaleString('default', { month: 'long' }) : 'August',
+      year: txData.date ? new Date(txData.date).getFullYear() : 2026,
+      accountId: txData.accountId || store.accounts[0]?.id || 'acc-1',
+      notes: txData.notes || 'Reconciled from bank statement',
+      isSubscription: false,
+      status: 'Cleared'
+    };
+
+    setStore((prev) => {
+      // 1. Add transaction to ledger
+      const updatedTxList = [fullTx, ...prev.transactions];
+
+      // 2. Adjust account balance
+      const updatedAccounts = prev.accounts.map((acc) => {
+        if (acc.id === fullTx.accountId) {
+          const delta = fullTx.type === 'Income' ? fullTx.amount : -fullTx.amount;
+          return { ...acc, balance: acc.balance + delta };
+        }
+        return acc;
+      });
+
+      // 3. Mark the statement item as Matched and link the transaction ID
+      const updatedStatements = (prev.statements || []).map((stmt) => {
+        if (stmt.id === statementId) {
+          const updatedItems = stmt.items.map((item) => {
+            if (item.id === statementItemId) {
+              return {
+                ...item,
+                reconciledStatus: 'Matched' as const,
+                matchedTransactionId: txId
+              };
+            }
+            return item;
+          });
+          const allMatched = updatedItems.every((i) => i.reconciledStatus === 'Matched');
+          const statusVal: 'Reconciled' | 'Needs Review' = allMatched ? 'Reconciled' : 'Needs Review';
+          return {
+            ...stmt,
+            items: updatedItems,
+            status: statusVal
+          };
+        }
+        return stmt;
+      });
+
+      return {
+        ...prev,
+        transactions: updatedTxList,
+        accounts: updatedAccounts,
+        statements: updatedStatements
+      };
+    });
+  };
+
   // Subscription Actions
   const handleAddSubscription = (sub: Partial<Subscription>) => {
     setStore((prev) => ({
@@ -370,6 +465,7 @@ export default function App() {
           <DashboardView
             transactions={store.transactions}
             accounts={store.accounts}
+            statements={store.statements || []}
             budgets={store.budgets}
             subscriptions={store.subscriptions}
             savingsGoals={store.savingsGoals}
@@ -378,6 +474,7 @@ export default function App() {
               setIsAddModalOpen(true);
             }}
             onNavigateToScanner={() => setActiveTab('scanner')}
+            onNavigateToStatements={() => setActiveTab('statements')}
             settings={store.settings || DEFAULT_SETTINGS}
           />
         )}
@@ -396,6 +493,20 @@ export default function App() {
             }}
             onDeleteTransaction={handleDeleteTransaction}
             onImportCSV={handleImportCSV}
+            onNavigateToStatements={() => setActiveTab('statements')}
+          />
+        )}
+
+        {activeTab === 'statements' && (
+          <StatementsView
+            statements={store.statements || []}
+            accounts={store.accounts}
+            transactions={store.transactions}
+            onAddStatement={handleAddStatement}
+            onDeleteStatement={handleDeleteStatement}
+            onUpdateStatement={handleUpdateStatement}
+            onAddTransactionFromStatement={handleAddTransactionFromStatement}
+            onNavigateToTransactions={() => setActiveTab('transactions')}
           />
         )}
 
@@ -500,17 +611,19 @@ export default function App() {
       </main>
 
       {/* Manual Expense & Income Record Modal */}
-      <TransactionModal
-        isOpen={isAddModalOpen}
-        onClose={() => {
-          setIsAddModalOpen(false);
-          setEditingTransaction(undefined);
-        }}
-        onSave={handleSaveTransaction}
-        accounts={store.accounts}
-        initialData={editingTransaction}
-        settings={store.settings || DEFAULT_SETTINGS}
-      />
+      {isAddModalOpen && (
+        <TransactionModal
+          isOpen={isAddModalOpen}
+          onClose={() => {
+            setIsAddModalOpen(false);
+            setEditingTransaction(undefined);
+          }}
+          onSave={handleSaveTransaction}
+          accounts={store.accounts}
+          initialData={editingTransaction}
+          settings={store.settings || DEFAULT_SETTINGS}
+        />
+      )}
 
     </div>
   );

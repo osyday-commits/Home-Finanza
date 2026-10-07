@@ -22,6 +22,7 @@ interface TransactionsViewProps {
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
   onImportCSV: (file: File) => void;
+  onNavigateToStatements?: () => void;
 }
 
 export const TransactionsView: React.FC<TransactionsViewProps> = ({
@@ -30,13 +31,25 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
   onAddTransaction,
   onEditTransaction,
   onDeleteTransaction,
-  onImportCSV
+  onImportCSV,
+  onNavigateToStatements
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'All' | TransactionType>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [accountFilter, setAccountFilter] = useState<string>('All');
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+
+  // Summary statistics
+  const totalIncome = transactions
+    .filter((t) => t.type === 'Income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpense = transactions
+    .filter((t) => t.type === 'Expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const netBalance = totalIncome - totalExpense;
 
   // Filter transactions
   const filtered = transactions.filter((t) => {
@@ -92,7 +105,7 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Home_Finance_Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Transactions_Ledger_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -112,10 +125,10 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#14161c] p-5 rounded-2xl border border-white/5 shadow-xl">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            Transactions & Financial Statements Ledger
+            Transactions
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Track expenses, incomes, and statements with manual adjustment capabilities
+            Collect and monitor all daily transactions, expenses, incomes, and payment receipts
           </p>
         </div>
 
@@ -144,6 +157,50 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
             <Plus className="w-4 h-4" />
             <span>+ Add Income / Expense</span>
           </button>
+        </div>
+      </div>
+
+      {/* Quick Metrics Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-[#14161c] border border-white/5 p-4 rounded-xl">
+          <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Recorded In</div>
+          <div className="text-xl font-bold text-emerald-400 font-serif mt-1">
+            +${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="text-[10px] text-slate-500 mt-0.5">All income deposits</div>
+        </div>
+
+        <div className="bg-[#14161c] border border-white/5 p-4 rounded-xl">
+          <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Recorded Out</div>
+          <div className="text-xl font-bold text-rose-400 font-serif mt-1">
+            -${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="text-[10px] text-slate-500 mt-0.5">All tracked expenses</div>
+        </div>
+
+        <div className="bg-[#14161c] border border-white/5 p-4 rounded-xl">
+          <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Net Cash Flow</div>
+          <div className={`text-xl font-bold font-serif mt-1 ${netBalance >= 0 ? 'text-indigo-400' : 'text-amber-400'}`}>
+            {netBalance >= 0 ? '+' : '-'}${Math.abs(netBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="text-[10px] text-slate-500 mt-0.5">Inflow minus outflow</div>
+        </div>
+
+        <div className="bg-[#14161c] border border-white/5 p-4 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Transactions Count</div>
+            <div className="text-xl font-bold text-white font-serif mt-1">
+              {filtered.length} <span className="text-xs font-sans text-slate-500">/ {transactions.length}</span>
+            </div>
+          </div>
+          {onNavigateToStatements && (
+            <button
+              onClick={onNavigateToStatements}
+              className="text-[10px] text-indigo-400 hover:text-indigo-300 text-left underline font-medium mt-1"
+            >
+              Auditing bank statements? Go to Statements &rarr;
+            </button>
+          )}
         </div>
       </div>
 

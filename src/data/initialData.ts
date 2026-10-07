@@ -1,4 +1,4 @@
-import { Transaction, Account, BudgetCategory, Subscription, SavingsGoal, AppSettings, InventoryItem } from '../types';
+import { Transaction, Account, BudgetCategory, Subscription, SavingsGoal, AppSettings, InventoryItem, BankStatement, StatementItem } from '../types';
 
 export const INITIAL_ACCOUNTS: Account[] = [
   {
@@ -505,3 +505,237 @@ export const DEFAULT_SETTINGS: AppSettings = {
     'Other Inventory': ['General Item', 'Miscellaneous']
   }
 };
+
+export const INITIAL_STATEMENTS: BankStatement[] = [
+  {
+    id: 'stmt-001',
+    filename: 'Chase_Sapphire_CreditCard_Statement_Aug2026.csv',
+    accountId: 'acc-3',
+    accountType: 'Credit Card',
+    institutionName: 'Chase Sapphire',
+    accountHolderName: 'Alex Miller',
+    statementPeriodStart: '2026-08-01',
+    statementPeriodEnd: '2026-08-31',
+    statementDate: '2026-08-31',
+    startingBalance: -550.00,
+    endingBalance: -642.50,
+    totalInflow: 800.00,
+    totalOutflow: 892.50,
+    netChange: -92.50,
+    importedAt: '2026-08-31T18:00:00Z',
+    status: 'Needs Review',
+    notes: 'Monthly August credit card cycle. Autopay payment credited on August 15.',
+    items: [
+      {
+        id: 'st-item-1',
+        date: '2026-08-01',
+        description: "TEXAS'S ROUTE GROCERY & DINING",
+        amount: 40.00,
+        type: 'Outflow',
+        referenceNo: 'AUTH-882109',
+        categoryHint: 'Everyday / Groceries',
+        matchedTransactionId: 'TRX -002',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-2',
+        date: '2026-08-03',
+        description: 'NETFLIX.COM DIGITAL SUBSCRIPTION',
+        amount: 22.99,
+        type: 'Outflow',
+        referenceNo: 'AUTH-110293',
+        categoryHint: 'Tech & Media / Subscriptions',
+        matchedTransactionId: 'TRX -006',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-3',
+        date: '2026-08-05',
+        description: 'SPOTIFY USA MONTHLY MEMBERSHIP',
+        amount: 14.99,
+        type: 'Outflow',
+        referenceNo: 'AUTH-441289',
+        categoryHint: 'Tech & Media / Subscriptions',
+        matchedTransactionId: 'TRX -009',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-4',
+        date: '2026-08-10',
+        description: 'AMAZON WEB SERVICES CLOUD HOSTING',
+        amount: 34.50,
+        type: 'Outflow',
+        referenceNo: 'AUTH-990142',
+        categoryHint: 'Tech & Media',
+        reconciledStatus: 'Unmatched'
+      },
+      {
+        id: 'st-item-5',
+        date: '2026-08-15',
+        description: 'AUTOPAY PAYMENT - THANK YOU',
+        amount: 800.00,
+        type: 'Inflow',
+        referenceNo: 'ACH-772183',
+        categoryHint: 'Credit Card Payment',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-6',
+        date: '2026-08-18',
+        description: 'WHOLE FOODS MARKET STORE #104',
+        amount: 95.20,
+        type: 'Outflow',
+        referenceNo: 'AUTH-661029',
+        categoryHint: 'Groceries',
+        reconciledStatus: 'Unmatched'
+      },
+      {
+        id: 'st-item-7',
+        date: '2026-08-22',
+        description: 'CHEVRON FUEL STATION',
+        amount: 48.00,
+        type: 'Outflow',
+        referenceNo: 'AUTH-339182',
+        categoryHint: 'Transportation / Fuel',
+        reconciledStatus: 'Unmatched'
+      }
+    ]
+  },
+  {
+    id: 'stmt-002',
+    filename: 'Chase_PrimaryChecking_Monthly_Aug2026.csv',
+    accountId: 'acc-1',
+    accountType: 'Checking',
+    institutionName: 'Chase Bank',
+    accountHolderName: 'Alex & Sarah Miller',
+    statementPeriodStart: '2026-08-01',
+    statementPeriodEnd: '2026-08-31',
+    statementDate: '2026-08-31',
+    startingBalance: 3500.25,
+    endingBalance: 4850.25,
+    totalInflow: 3457.00,
+    totalOutflow: 2107.00,
+    netChange: 1350.00,
+    importedAt: '2026-08-31T20:30:00Z',
+    status: 'Reconciled',
+    notes: 'August checking account statement. Direct deposit salary cleared on the 1st.',
+    items: [
+      {
+        id: 'st-item-201',
+        date: '2026-08-01',
+        description: 'DIRECT DEPOSIT ACME GLOBAL CORP PAYROLL',
+        amount: 3450.00,
+        type: 'Inflow',
+        referenceNo: 'ACH-009182',
+        categoryHint: 'Income / Salary',
+        matchedTransactionId: 'TRX -004',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-202',
+        date: '2026-08-01',
+        description: 'HIPERKIDS ACTIVITY CENTER PLAYGROUND',
+        amount: 22.00,
+        type: 'Outflow',
+        referenceNo: 'DEBIT-449102',
+        categoryHint: 'Everyday / Children & Family',
+        matchedTransactionId: 'TRX -003',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-203',
+        date: '2026-08-02',
+        description: 'AVENUE PROPERTY MGMT ACH RENT PAYMENT',
+        amount: 1450.00,
+        type: 'Outflow',
+        referenceNo: 'ACH-552190',
+        categoryHint: 'Housing / Rent',
+        matchedTransactionId: 'TRX -005',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-204',
+        date: '2026-08-04',
+        description: 'DUKE ENERGY ELECTRIC UTILITY',
+        amount: 125.00,
+        type: 'Outflow',
+        referenceNo: 'ACH-889102',
+        categoryHint: 'Housing / Utilities',
+        matchedTransactionId: 'TRX -008',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-205',
+        date: '2026-08-28',
+        description: 'MONTHLY INTEREST PAYMENT RECEIVED',
+        amount: 7.00,
+        type: 'Inflow',
+        referenceNo: 'INT-339182',
+        categoryHint: 'Income / Interest',
+        reconciledStatus: 'Unmatched'
+      }
+    ]
+  },
+  {
+    id: 'stmt-003',
+    filename: 'Marcus_GoldmanSachs_Savings_Aug2026.csv',
+    accountId: 'acc-2',
+    accountType: 'Savings',
+    institutionName: 'Marcus by Goldman Sachs',
+    accountHolderName: 'Sarah Miller',
+    statementPeriodStart: '2026-08-01',
+    statementPeriodEnd: '2026-08-31',
+    statementDate: '2026-08-31',
+    startingBalance: 12400.50,
+    endingBalance: 13325.50,
+    totalInflow: 1250.00,
+    totalOutflow: 325.00,
+    netChange: 925.00,
+    importedAt: '2026-08-31T21:15:00Z',
+    status: 'Reconciled',
+    notes: 'High-Yield Savings statement. Monthly emergency fund contribution + accrued APY dividend.',
+    items: [
+      {
+        id: 'st-item-301',
+        date: '2026-08-02',
+        description: 'ONLINE TRANSFER IN AUTOMATIC SAVINGS',
+        amount: 1000.00,
+        type: 'Inflow',
+        referenceNo: 'TX-990184',
+        categoryHint: 'Savings / Emergency Fund',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-302',
+        date: '2026-08-14',
+        description: 'WITHDRAWAL TRANSFER TO CHECKING ACCOUNT',
+        amount: 325.00,
+        type: 'Outflow',
+        referenceNo: 'WTH-441092',
+        categoryHint: 'Transfer / Spending',
+        reconciledStatus: 'Matched'
+      },
+      {
+        id: 'st-item-303',
+        date: '2026-08-20',
+        description: 'FREELANCE DESIGN INVOICE PAYMENT #104',
+        amount: 200.00,
+        type: 'Inflow',
+        referenceNo: 'INV-881923',
+        categoryHint: 'Income / Side Hustle',
+        reconciledStatus: 'Unmatched'
+      },
+      {
+        id: 'st-item-304',
+        date: '2026-08-31',
+        description: 'MONTHLY HIGH YIELD SAVINGS INTEREST APY',
+        amount: 50.00,
+        type: 'Inflow',
+        referenceNo: 'INT-991204',
+        categoryHint: 'Income / Interest',
+        reconciledStatus: 'Matched'
+      }
+    ]
+  }
+];
+

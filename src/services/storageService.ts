@@ -1,5 +1,5 @@
-import { FinancialDataStore, Transaction, Account, BudgetCategory, Subscription, SavingsGoal, BiometricSettings } from '../types';
-import { INITIAL_ACCOUNTS, INITIAL_TRANSACTIONS, INITIAL_BUDGETS, INITIAL_SUBSCRIPTIONS, INITIAL_SAVINGS_GOALS, DEFAULT_SETTINGS, INITIAL_INVENTORY } from '../data/initialData';
+import { FinancialDataStore, Transaction, Account, BudgetCategory, Subscription, SavingsGoal, BiometricSettings, BankStatement } from '../types';
+import { INITIAL_ACCOUNTS, INITIAL_TRANSACTIONS, INITIAL_BUDGETS, INITIAL_SUBSCRIPTIONS, INITIAL_SAVINGS_GOALS, DEFAULT_SETTINGS, INITIAL_INVENTORY, INITIAL_STATEMENTS } from '../data/initialData';
 
 const STORE_KEY = 'home_finance_app_store_v1';
 const BIOMETRIC_KEY = 'home_finance_biometric_v1';
@@ -12,6 +12,9 @@ export const loadFinancialStore = (): FinancialDataStore => {
       if (parsed.transactions && parsed.accounts) {
         if (!parsed.inventory || !Array.isArray(parsed.inventory)) {
           parsed.inventory = INITIAL_INVENTORY;
+        }
+        if (!parsed.statements || !Array.isArray(parsed.statements)) {
+          parsed.statements = INITIAL_STATEMENTS;
         }
         if (!parsed.settings) {
           parsed.settings = DEFAULT_SETTINGS;
@@ -39,6 +42,7 @@ export const loadFinancialStore = (): FinancialDataStore => {
     budgets: INITIAL_BUDGETS,
     subscriptions: INITIAL_SUBSCRIPTIONS,
     savingsGoals: INITIAL_SAVINGS_GOALS,
+    statements: INITIAL_STATEMENTS,
     inventory: INITIAL_INVENTORY,
     settings: DEFAULT_SETTINGS,
     lastUpdated: new Date().toISOString()

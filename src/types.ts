@@ -85,6 +85,39 @@ export interface AIReceiptExtraction {
   frequency: Frequency;
 }
 
+export interface StatementItem {
+  id: string;
+  date: string; // YYYY-MM-DD
+  description: string;
+  amount: number; // positive number
+  type: 'Inflow' | 'Outflow'; // Inflow (Deposit / Credit / Refund) or Outflow (Debit / Charge / Payment)
+  referenceNo?: string;
+  categoryHint?: string;
+  matchedTransactionId?: string; // ID of transaction in transactions ledger if matched
+  reconciledStatus?: 'Matched' | 'Unmatched' | 'Ignored';
+}
+
+export interface BankStatement {
+  id: string;
+  filename: string;
+  accountId: string; // linked Account id
+  accountType: 'Checking' | 'Savings' | 'Credit Card' | 'Investment';
+  institutionName: string; // e.g. Chase Bank, Chase Sapphire, Marcus
+  accountHolderName?: string; // Person the statement belongs to (e.g. Alex Miller, John Doe)
+  statementPeriodStart: string; // YYYY-MM-DD
+  statementPeriodEnd: string; // YYYY-MM-DD
+  statementDate: string; // Closing date
+  startingBalance: number;
+  endingBalance: number;
+  totalInflow: number; // Total Money In (deposits, credits, refunds)
+  totalOutflow: number; // Total Money Out (debits, charges, fees)
+  netChange: number; // Inflow - Outflow
+  importedAt: string; // ISO date string
+  items: StatementItem[];
+  notes?: string;
+  status: 'Reconciled' | 'Needs Review' | 'Discrepancy';
+}
+
 export interface AIStatementExtraction {
   statementDate?: string;
   accountName?: string;
@@ -241,6 +274,7 @@ export interface FinancialDataStore {
   budgets: BudgetCategory[];
   subscriptions: Subscription[];
   savingsGoals: SavingsGoal[];
+  statements?: BankStatement[];
   inventory?: InventoryItem[];
   settings?: AppSettings;
   lastUpdated: string;
